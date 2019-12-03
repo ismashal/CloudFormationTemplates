@@ -21,7 +21,7 @@ Resources:
   MainVPC:
     Type: 'AWS::EC2::VPC'
     Properties:
-      CidrBlock: !Join ['.', [ 10, !Ref EnvironmentNumber, 0, 0/16]]
+      CidrBlock: !Join ['.', [ 172, !Ref EnvironmentNumber, 0, 0/16]]
       EnableDnsSupport: true
       EnableDnsHostnames: true
       InstanceTenancy: default
@@ -42,7 +42,7 @@ Resources:
       VpcId: !Ref MainVPC
      # MapPublicIpOnLaunch: true
       CidrBlock: !Sub
-        - 10.${MyEnvironment}.${MySubnet}
+        - 172.${MyEnvironment}.${MySubnet}
         - { MyEnvironment: !Ref EnvironmentNumber, MySubnet: !FindInMap [ AWSSubnets, private, 0 ]}
       AvailabilityZone: !Select
         - 0
@@ -59,7 +59,7 @@ Resources:
       VpcId: !Ref MainVPC
     #  MapPublicIpOnLaunch: true
       CidrBlock: !Sub
-        - 10.${MyEnvironment}.${MySubnet}
+        - 172.${MyEnvironment}.${MySubnet}
         - { MyEnvironment: !Ref EnvironmentNumber, MySubnet: !FindInMap [ AWSSubnets, private, 1 ]}
       AvailabilityZone: !Select
         - 1
@@ -76,7 +76,7 @@ Resources:
       VpcId: !Ref MainVPC
       MapPublicIpOnLaunch: true
       CidrBlock: !Sub
-        - 10.${MyEnvironment}.${MySubnet}
+        - 172.${MyEnvironment}.${MySubnet}
         - { MyEnvironment: !Ref EnvironmentNumber, MySubnet: !FindInMap [ AWSSubnets, public, 0 ]}
       AvailabilityZone: !Select
         - 0
@@ -93,7 +93,7 @@ Resources:
       VpcId: !Ref MainVPC
       MapPublicIpOnLaunch: true
       CidrBlock: !Sub
-        - 10.${MyEnvironment}.${MySubnet}
+        - 172.${MyEnvironment}.${MySubnet}
         - { MyEnvironment: !Ref EnvironmentNumber, MySubnet: !FindInMap [ AWSSubnets, public, 1 ]}
       AvailabilityZone: !Select
         - 1
@@ -221,7 +221,7 @@ Outputs:
   # Private0Subnet:
     # Description: 'Private Subnet 0'
     # Value: !Sub
-      # - 10.${MyEnvironment}.${MySubnet}
+      # - 172.${MyEnvironment}.${MySubnet}
       # - { MyEnvironment: !Ref EnvironmentNumber, MySubnet: !FindInMap [ AWSSubnets, Private, 0 ]}
     # Export:
       # Name: !Join ['-', [!Ref 'AWS::StackName', 'PRIVATE0Subnet']]
@@ -229,7 +229,7 @@ Outputs:
   # Private1Subnet:
     # Description: 'Private Subnet 1'
     # Value: !Sub
-      # - 10.${MyEnvironment}.${MySubnet}
+      # - 172.${MyEnvironment}.${MySubnet}
       # - { MyEnvironment: !Ref EnvironmentNumber, MySubnet: !FindInMap [ AWSSubnets, Private, 1 ]}
     # Export:
       # Name: !Join ['-', [!Ref 'AWS::StackName', 'PRIVATE1Subnet']]
@@ -251,7 +251,7 @@ Outputs:
   # Public0Subnet:
     # Description: 'Public Subnet 0'
     # Value: !Sub
-      # - 10.${MyEnvironment}.${MySubnet}
+      # - 172.${MyEnvironment}.${MySubnet}
       # - { MyEnvironment: !Ref EnvironmentNumber, MySubnet: !FindInMap [ AWSSubnets, Public, 0 ]}
     # Export:
       # Name: !Join ['-', [!Ref 'AWS::StackName', 'PUBLIC0Subnet']]
@@ -259,7 +259,7 @@ Outputs:
   # Public1Subnet:
     # Description: 'Public Subnet 1'
     # Value: !Sub
-      # - 10.${MyEnvironment}.${MySubnet}
+      # - 172.${MyEnvironment}.${MySubnet}
       # - { MyEnvironment: !Ref EnvironmentNumber, MySubnet: !FindInMap [ AWSSubnets, Public, 1 ]}
     # Export:
       # Name: !Join ['-', [!Ref 'AWS::StackName', 'PUBLIC1Subnet']]
