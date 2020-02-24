@@ -1,0 +1,115 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description" : "Creates an RDS instance",
+
+  "Parameters" : {
+    "DBInstanceIdentifier": {
+      "Type" : "String",
+      "MinLength" : "1",
+      "Description" : "Name of the RDS Instance"
+    },
+    "RDSDbSize": {
+      "Description" : "Must be one of the valid RDS instance types (db.m3.medium | db.m3.large | db.m3.xlarge | etc.).",
+      "Type" : "String",
+      "Default" : "db.t2.medium",
+      "AllowedValues" : [ "db.t2.micro","db.t2.small","db.t2.medium","db.t2.large","db.t2.xlarge","db.t2.2xlarge","db.m4.large","db.m4.xlarge","db.m4.2xlarge","db.m4.4xlarge","db.m4.10xlarge","db.m4.16xlarge"],
+      "ConstraintDescription" : "Must be one of the valid RDS instance types."
+    },
+    "RDSUser" : {
+      "Description" : "Master Username must start with a letter. Must contain 1 to 63 alphanumeric characters.",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "64",
+      "AllowedPattern" : "[-_a-zA-Z0-9]*",
+      "ConstraintDescription" : "Master Username must start with a letter. Must contain 1 to 63 alphanumeric characters."
+    },
+    "RDSPassword" : {
+      "Description" : "Master Password must be at least eight characters long, as in \"mypassword\". Can be any printable ASCII character except \"/\", \"\"\", or \"@\".",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "64",
+      "NoEcho" : "true"
+    },
+    "RDSMultiAz" : {
+      "Type" : "String",
+      "Description": "Should RDS database be created in MultiAZ configuration",
+      "Default": "false",
+      "AllowedValues" : ["true","false"],
+      "ConstraintDescription": "Value must be true or false"
+    },
+    "AvailabilityZones" : {
+      "Description" : "Availability Zones which support ELB,Autoscaling,Postgres RDS(MultiAz)",
+      "Type" : "List<AWS::EC2::AvailabilityZone::Name>",
+      "MinLength" : "1"
+    },
+    "SecuredIp" : {
+      "Description" : "IP/Mask which will be allowed for SSH access. (i.e. 192.168.0.1/32 for a single ip or 0.0.0.0/0  for everyone)",
+      "Type" : "String",
+      "AllowedPattern" : "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$",
+      "ConstraintDescription" : "Secured ip must be valid IPv4 CIDR address for example 1.2.3.4/32"
+    },
+    "VpcId" : {
+      "Type" : "AWS::EC2::VPC::Id",
+      "Description" : "VpcId of your existing Virtual Private Cloud (VPC)",
+      "MinLength": "1",
+      "MaxLength": "64"
+    },
+    "DBSubnetGroup" : {
+      "Type" : "String",
+      "Description" : "RDS DB Subnet Group Name",
+      "MinLength" : "1"
+    },
+    "DBSecurityGroup" : {
+      "Type" : "List<AWS::EC2::SecurityGroup::Id>",
+      "Description" : "Security group for DB instance"
+    }
+  },
+   "Conditions" : {
+     "RDSMultiAzDeployment" : {"Fn::Equals" : [{"Ref" : "RDSMultiAz"}, "true"] }
+   },
+
+   "Resources": {
+    "RDSDb" : {
+     "Type" : "AWS::RDS::DBInstance",
+     "Properties" : {
+      "DBInstanceIdentifier" : { "Ref" : "DBInstanceIdentifier" },
+      "DBSubnetGroupName" : { "Ref" : "DBSubnetGroup"},
+      "MultiAZ" : {"Fn::If" : ["RDSMultiAzDeployment","true",{"Ref": "AWS::NoValue"}]},
+      "AvailabilityZone" : {"Fn::If" : ["RDSMultiAzDeployment",{"Ref": "AWS::NoValue"},{"Fn::Select" : ["0",{"Ref" : "AvailabilityZones"}]}]},
+      "VPCSecurityGroups" : { "Ref" : "DBSecurityGroup" },
+      "AllocatedStorage" : "5",
+      "DBInstanceClass" : { "Ref" : "RDSDbSize" },
+      "Engine" : "postgres",
+      "MasterUsername" : { "Ref" : "RDSUser" },
+      "MasterUserPassword" : { "Ref" : "RDSPassword" }
+     },
+     "DeletionPolicy" : "Snapshot"
+    }
+
+  },
+
+  "Outputs" : {
+    "DBURL" : {
+      "Description" : "RDS DB URL",
+      "Value" : {
+        "Fn::GetAtt" : [
+          "RDSDb",
+          "Endpoint.Address"
+        ]
+      }
+    },
+    "DBPort" : {
+      "Description" : "RDS DB Port",
+      "Value" : {
+        "Fn::GetAtt" : [
+          "RDSDb",
+          "Endpoint.Port"
+        ]
+      }
+    },
+    "DBUser" : {
+      "Description" : "RDS Master User",
+      "Value" : { "Ref" : "RDSUser" }
+    }
+  }
+}
